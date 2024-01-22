@@ -1,0 +1,122 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <link rel="stylesheet" href="css/style.css">
+  <meta name="description" content="">
+
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#fafafa">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/classnames@2.5.1/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+</head>
+
+<body>
+
+<div id="controls">
+
+  <button id='startgame'>Reset game state</button>
+  <button id="pause">Play</button>
+
+</div>
+
+<div>
+  This is minimal implementation of <a target="_blank" href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's game of life</a> in javascript. Click the squares to make a seed pattern and then click "Play" top start.
+</div>
+
+
+
+<script src="js/app.js"></script>
+<script>
+  var interval;
+  var paused=true
+
+  function playPause(){
+    paused=!paused
+    if (paused){
+      $('#pause').text('Play')
+    } else {
+      $('#pause').text('Pause')
+    }
+  }
+
+  function startGame() {
+    try {
+      clearInterval(interval)
+    } catch {
+      null;
+    }
+
+    var game = new GameOfLife(40, 40, []);
+
+    const gameboard = $('#gameboard')
+    for (const cell of game.cells) {
+      const cellElement = $(`<div data-id="${cell.x}-${cell.y}" class="${cell.live ? "cell live" : "cell"}"></div>`)
+
+      cellElement.css({
+        top: cell.y * 20,
+        left: cell.x * 20
+      })
+
+      gameboard.append(cellElement)
+    }
+
+    $(".cell").on('click', (e) => {
+      if (!paused){
+        return
+      }
+      $(e.target).toggleClass('live')
+      const id = $(e.target).data('id')
+      const c = game.cells.find(c=>c.id==id)
+      c.live=!c.live
+  })
+
+    interval = setInterval(() => {
+      if (paused){
+        return
+      }
+      game.tick()
+
+      $('#gameboard .cell').removeClass('live')
+      for (const cell of game.cells) {
+        const cellElement = $(`[data-id="${cell.x}-${cell.y}"]`)
+        if (cell.live) {
+          cellElement.addClass('live')
+        }
+      }
+      $("#numCycle").text(game.numCycle)
+
+    }, 100)
+
+  }
+
+  $('#startgame').on('click', startGame)
+  $("#pause").on('click', playPause)
+
+</script>
+
+
+
+<div id="gameboard"></div>
+<div id="numCycle"></div>
+
+<script defer>
+    startGame()
+</script>
+
+</body>
+
+</html>
